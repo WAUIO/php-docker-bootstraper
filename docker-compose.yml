@@ -1,0 +1,48 @@
+name: bootstraper
+services:
+  php:
+    image: bootstraper/php:latest
+    build:
+      context: .
+      dockerfile: ci/docker/php/Dockerfile
+      args:
+        PHP_VERSION: 7.4
+    volumes:
+      - application-data:/var/www/html
+    working_dir: /var/www/html
+  httpd:
+    image: bootstraper/httpd:latest
+    build:
+      context: .
+      dockerfile: ci/docker/httpd/Dockerfile
+    volumes:
+      - application-data:/var/www/html
+      - ./ci/docker/httpd/httpd.conf:/usr/local/apache2/conf/httpd.conf
+      - ./ci/docker/httpd/httpd-vhosts.conf:/usr/local/apache2/conf/extra/httpd-vhosts.conf
+      - ./ci/docker/httpd/logs:/var/log/apache2
+    ports:
+      - "8080:80"
+    depends_on:
+      - php
+  mysql:
+    image: bootstraper/mysql:latest
+    build:
+      context: .
+      dockerfile: ci/docker/mysql/Dockerfile
+      args:
+        MYSQL_VERSION: 8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: bootstraper
+      MYSQL_USER: bootstraper
+      MYSQL_PASSWORD: bootstraper
+    ports:
+      - "3306:3306"
+
+volumes:
+  application-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: $PWD/htdocs/public
+      o: bind
