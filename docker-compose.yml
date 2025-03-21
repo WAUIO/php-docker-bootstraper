@@ -10,6 +10,11 @@ services:
     volumes:
       - application-data:/var/www/html
     working_dir: /var/www/html
+    ports:
+      - "19000:9000"
+    environment:
+      # mysql://[user[:password]@]host[:port]/database
+      DB_URI: mysql://bootstraper:bootstraper@mysql:3306/bootstraper
   httpd:
     image: bootstraper/httpd:latest
     build:
@@ -38,6 +43,8 @@ services:
       MYSQL_PASSWORD: bootstraper
     ports:
       - "3306:3306"
+    volumes:
+      - ./ci/docker/mysql/data:/var/lib/mysql
 
 volumes:
   application-data:
